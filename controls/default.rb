@@ -16,19 +16,20 @@ control 'timezone-ntp-config' do
   end.only_if { file('/etc/timezone').exist? }
 
   # Check NTP servers configuration
-  ntp_servers = ['0.pool.ntp.org', '1.pool.ntp.org']
+  ntp_servers = attribute('ntp_servers', default: ['0.pool.ntp.org', '1.pool.ntp.org'])
   
   # For systems using chrony
-  describe file('/etc/chrony.conf') do
+  describe chrony_conf do
     ntp_servers.each do |server|
-      its('content') { should match /^(server|pool)\s+#{Regexp.escape(server)}/ }
+      its('server') { should include server }
+      its('pool') { should include server }
     end
   end.only_if { file('/etc/chrony.conf').exist? }
 
   # For systems using ntp
-  describe file('/etc/ntp.conf') do
+  describe ntp_conf do
     ntp_servers.each do |server|
-      its('content') { should match /^server\s+#{Regexp.escape(server)}/ }
+      its('server') { should include server }
     end
   end.only_if { file('/etc/ntp.conf').exist? }
 
