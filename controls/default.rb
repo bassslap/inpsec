@@ -22,8 +22,9 @@ control 'timezone-ntp-config' do
   ntp_configured = false
   
   # For systems using chrony (Ubuntu/Debian or RHEL/CentOS)
-  if file('/etc/chrony/chrony.conf').exist? || file('/etc/chrony.conf').exist?
-    describe chrony_conf do
+  chrony_conf_path = file('/etc/chrony/chrony.conf').exist? ? '/etc/chrony/chrony.conf' : '/etc/chrony.conf'
+  if file(chrony_conf_path).exist?
+    describe chrony_conf(chrony_conf_path) do
       ntp_servers.each do |server|
         its('server') { should include server }
         its('pool') { should include server }
