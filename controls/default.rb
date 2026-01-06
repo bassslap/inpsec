@@ -26,8 +26,9 @@ control 'timezone-ntp-config' do
   if file(chrony_conf_path).exist?
     describe chrony_conf(chrony_conf_path) do
       ntp_servers.each do |server|
-        its('server') { should include server }
-        its('pool') { should include server }
+        # Check both server and pool entries, handling potential trailing spaces
+        its('servers') { should include(server).or include("#{server} ") } unless chrony_conf(chrony_conf_path).servers.nil?
+        its('pools') { should include(server).or include("#{server} ") } unless chrony_conf(chrony_conf_path).pools.nil?
       end
     end
     ntp_configured = true
